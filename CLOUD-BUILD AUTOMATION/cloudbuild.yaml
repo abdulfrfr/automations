@@ -1,0 +1,23 @@
+steps:
+  # Pull Image from GCR Repo, tag and push to gcr registery
+  - name: "gcr.io/cloud-builders/docker"
+  - entrypoint: bash
+    args: 
+      - -c
+      - |
+        echo "Pulling images..."
+        us-docker.pkg.dev/cloudrun/container/hello
+        docker tag us-docker.pkg.dev/cloudrun/container/hello $_HOST/$_PROJECT/$_REPO/$_IMAGE_NAME:latest
+
+        docker push $_HOST/$_PROJECT/$_REPO/$_IMAGE_NAME:latest
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builder/gcloud'
+    entrypoint: bash
+    args:
+    - -c
+    - |
+      echo "Deploying image to Cloud run"
+      gcloud run deploy $_service --image $_HOST/$_PROJECT/$_REPO/$_IMAGE_NAME:latest --region $_REGION
+   
+options:
+  logging: CLOUD_LOGGING_ONLY
